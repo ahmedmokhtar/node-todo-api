@@ -5,19 +5,33 @@ mongoose.connect('mongodb://localhost:27017/TodoApp')
 
 const Todo = mongoose.model('Todo', {
     text: {
-        type: String
+        type: String,
+        required: true,
+        minlength: 1,
+        trim: true
     },
     completed: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     completedAt: {
-        type: Number
+        type: Number,
+        default: null
     }
 })
 
-const newTodo = new Todo({
-    text: 'Cook new dinner'
+const User = mongoose.model('User', {
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 1
+    }
 })
+
+// const newTodo = new Todo({
+//     text: 'Cook new dinner'
+// })
 
 // newTodo.save().then((doc) => {
 //     console.log('saved todo: ', doc)
@@ -25,14 +39,22 @@ const newTodo = new Todo({
 //     console.log('Unable to save todo', err)
 // })
 
-const anotherTodo = new Todo({
-    text: 'Learn coding',
-    completed: false,
-    completedAt: 1234562
+// const anotherTodo = new Todo({
+//     text: '   Edit this todo    '
+// })
+
+// anotherTodo.save().then((doc) => {
+//     console.log(JSON.stringify(doc, undefined, 2))
+// }, (err) => {
+//     console.log('Unable to save todo', err)
+// })
+
+const newUser = new User({
+    email: '   ahmed@ahmed.com'
 })
 
-anotherTodo.save().then((doc) => {
-    console.log(doc)
+newUser.save().then((doc) => {
+    console.log(JSON.stringify(doc, undefined, 2))
 }, (err) => {
-    console.log('Unable to save todo', err)
+    console.log('Unable to save user', err)
 })
