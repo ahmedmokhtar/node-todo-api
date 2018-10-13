@@ -7,7 +7,8 @@
     "test": "mocha server/**/*.test.js",
     "test-watch": "nodemon --exec \"npm test\"",
     "mongo": "mongod --dbpath \"C:\\Users\\amokhtar\\mongo-data\"",
-    "start": "node server\\server.js"
+    "start": "node server\\server.js",
+    "vscode": "code -g D:\\node-projects\\node-todo-api"
   },
   "keywords": [],
   "author": "",
