@@ -239,4 +239,54 @@ describe('POST /users', () => {
             .expect(400, done)
             
     })
+}) 
+
+describe('POST /users/login', () => {
+    it('should login user and return auth token', (done) => {
+        const {email, password, _id} = users[1]
+
+        request(app)
+            .post('/users/login')
+            .send({email, password})
+            .expect(200)
+            .expect((res) => {
+                expect(res.header['x-auth']).toExist()
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err)
+                }
+
+                User.findById(_id).then((user) => {
+                    expect(user.tokens[0]).toInclude({
+                        access: 'auth',
+                        token: res.header['x-auth']
+                    })
+                    done()
+                }).catch((err) => done(err))
+            })
+    })
+
+    it('should reject invalid login', (done) => {
+        const {email, password, _id} = users[1]
+        const wrongPass = password + '123'
+
+        request(app)
+            .post('/users/login')
+            .send({email, password: wrongPass})
+            .expect(400)
+            .expect((res) => {
+                expect(res.header['x-auth']).toNotExist()
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err)
+                }
+
+                User.findById(_id).then((user) => {
+                    expect(user.tokens[0]).toNotExist()
+                    done()
+                }).catch((err) => done(err))
+            })
+    })
 })
