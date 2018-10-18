@@ -101,11 +101,12 @@ app.post('/users', (req, res) => {
     const user = new User(body)
 
     user.generateAuthToken()
-    .then((token) => {
+        .then((token) => {
         res.header('x-auth', token).send(user)
-    }).catch((err) => {
+        })
+        .catch((err) => {
         res.status(400).send(err)
-    })
+        })
     
 })
 
@@ -113,13 +114,17 @@ app.post('/users', (req, res) => {
 app.post('/users/login', (req, res) => {
     const body = _.pick(req.body, ['email', 'password'])
 
-    User.findByCredentials(body.email, body.password).then((user) => {
-        return user.generateAuthToken().then((token) => {
+    User.findByCredentials(body.email, body.password)
+        .then((user) => {
+            const token = user.generateAuthToken()
+            return Promise.all([token, user])    
+        })
+        .then(([token, user]) => {
             res.header('x-auth', token).send(user)
         })
-    }).catch((err) => {
-        res.status(400).send(err)
-    })
+        .catch((err) => {
+            res.status(400).send(err)
+        })
 
     // const {email, password} = req.body
 
