@@ -4,6 +4,7 @@ const _ = require('lodash')
 const express = require('express')
 const bodyParser = require('body-parser')
 const {ObjectID} = require('mongodb')
+const bcrypt = require('bcryptjs')
 
 const {mongoose} = require('./db/mongoose')
 const {Todo} = require('./models/todo')
@@ -94,6 +95,7 @@ app.patch('/todos/:id', (req, res) => {
     })
 })
 
+// POST /users
 app.post('/users', (req, res) => {
     const body = _.pick(req.body, ['email', 'password'])
     const user = new User(body)
@@ -107,6 +109,36 @@ app.post('/users', (req, res) => {
     
 })
 
+//POST /users/login
+app.post('/users/login', (req, res) => {
+    const body = _.pick(req.body, ['email', 'password'])
+
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user)
+        })
+    }).catch((err) => {
+        res.status(400).send(err)
+    })
+
+    // const {email, password} = req.body
+
+    // User.findOne({email}).then((user) => {
+    //     if (!user) {
+    //         return Promise.reject('user not found')
+    //     }
+
+    //     const isMatching = bcrypt.compareSync(password, user.password)
+
+    //     if (!isMatching) {
+    //         return Promise.reject('wrong password')
+    //     }
+
+    //     return res.send(user)
+    // }).catch((err) => {
+    //     res.status(404).send(err)
+    // })
+})
 
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user)
