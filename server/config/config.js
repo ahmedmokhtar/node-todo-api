@@ -10,3 +10,16 @@ if (env === 'development' || env === 'test') {
 }
 
 console.log('env >>>>>>> ', env)
+
+// {
+//     "test": {
+//         "PORT": 3000,
+//         "MONGODB_URI": "mongodb://localhost:27017/TodoAppTest",
+//         "JWT_SECRET": "abodkekoskek20sls93l"
+//     },
+//     "development": {
+//         "PORT": 3000,
+//         "MONGODB_URI": "mongodb://localhost:27017/TodoApp",
+//         "JWT_SECRET": "aiw20solslsw93lfvfjmv"
+//     }
+// }
