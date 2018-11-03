@@ -57,23 +57,27 @@ app.get('/todos/:id', authenticate, (req, res) => {
     }).catch((err) => res.status(400).send())
 })
 
-app.delete('/todos/:id', authenticate, (req, res) => {
+app.delete('/todos/:id', authenticate, async (req, res) => {
     const id = req.params.id
 
     if (!ObjectID.isValid(id)) {
         return res.status(404).send()
     }
 
-    Todo.findOneAndRemove({
-        _id: id,
-        _creator: req.user._id
-    }).then((todo) => {
+    try {
+        const todo = await Todo.findOneAndRemove({
+            _id: id,
+            _creator: req.user._id
+        })
+    
         if(todo) {
             res.send({todo})
         } else {
             res.status(404).send()
         }
-    }).catch((err) => res.status(400).send())
+    } catch (e) {
+        res.status(400).send()
+    }
 })
 
 app.patch('/todos/:id', authenticate, (req, res) => {
@@ -103,63 +107,40 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 })
 
 // POST /users
-app.post('/users', (req, res) => {
-    const body = _.pick(req.body, ['email', 'password'])
-    const user = new User(body)
-
-    user.generateAuthToken()
-        .then((token) => {
+app.post('/users', async (req, res) => {
+    try {
+        const body = _.pick(req.body, ['email', 'password'])
+        const user = new User(body)
+        const token = await user.generateAuthToken()
         res.header('x-auth', token).send(user)
-        })
-        .catch((err) => {
-        res.status(400).send(err)
-        })
-    
+    } catch (e) {
+        res.status(400).send()
+    }    
 })
 
 //POST /users/login
-app.post('/users/login', (req, res) => {
-    const body = _.pick(req.body, ['email', 'password'])
-
-    User.findByCredentials(body.email, body.password)
-        .then((user) => {
-            const token = user.generateAuthToken()
-            return Promise.all([token, user])    
-        })
-        .then(([token, user]) => {
-            res.header('x-auth', token).send(user)
-        })
-        .catch((err) => {
-            res.status(400).send(err)
-        })
-
-    // const {email, password} = req.body
-
-    // User.findOne({email}).then((user) => {
-    //     if (!user) {
-    //         return Promise.reject('user not found')
-    //     }
-
-    //     const isMatching = bcrypt.compareSync(password, user.password)
-
-    //     if (!isMatching) {
-    //         return Promise.reject('wrong password')
-    //     }
-
-    //     return res.send(user)
-    // }).catch((err) => {
-    //     res.status(404).send(err)
-    // })
+app.post('/users/login', async (req, res) => {
+    try {
+        const body = _.pick(req.body, ['email', 'password'])
+        const user = await User.findByCredentials(body.email, body.password)
+        const token = await user.generateAuthToken()
+        res.header('x-auth', token).send(user)
+    } catch (e) {
+        res.status(400).send()
+    }
 })
 
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user)
 })
 
-app.delete('/users/me/token', authenticate, (req, res) => {
-    req.user.removeToken(req.token).then(() => {
+app.delete('/users/me/token', authenticate, async (req, res) => {
+    try {
+        await req.user.removeToken(req.token)
         res.status(200).send()
-    }).catch((err) => res.status(400).send(err))
+    } catch (e) {
+        res.status(400).send()
+    }
 })
 
 app.listen(port, () => {
